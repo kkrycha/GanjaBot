@@ -18,28 +18,29 @@
 import urllib, urllib2, json, re
 from magnet_utils import *
 from magnet_api import *
-from magnet_config import GOOGLE_KEY
+from magnet_config import GOOGLE_KEY, GOOGLE_CX
 
 
 def googlesearch(query, num=0, safe="off"):
-  url = 'http://ajax.googleapis.com/ajax/services/search/web?v=1.0%s&safe=%s&q=%s'%(
+  url = 'https://www.googleapis.com/customsearch/v1?key=%s&cx=%s&safe=%s&q=%s'%(
     GOOGLE_KEY,
+    GOOGLE_CX,
     safe,
     urllib.quote_plus(query.encode('utf-8'))
   )
   rec = urllib2.urlopen(url)
   js = json.loads(rec.read())
-  results = js['responseData']['results']
+  results = js['items']
   if len(results)>num:
     r = results[num]
     #reg = re.compile('<b>([^<]+)</b>', re.IGNORECASE)
     #content = reg.sub('\\1', r['content'])
-    content = r['content']
+    content = r['snippet']
     content = content.replace('<b>', '')
     content = content.replace('</b>', '')
     content = unhtml(content)
-    title = unhtml(r['titleNoFormatting'])
-    return '%s\n%s\n%s'%(title, content, r['unescapedUrl'])
+    title = unhtml(r['title'])
+    return '%s\n%s\n%s'%(title, content, r['formattedUrl'])
   else:
     return 'Nothing found.'
 
@@ -140,4 +141,4 @@ def unload(bot):
   pass
 
 def info(bot):
-  return 'Google plugin v1.0.3'
+  return 'Google plugin v1.0.4'
