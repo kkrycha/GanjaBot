@@ -32,6 +32,15 @@ def command_ban(bot, room, nick, access_level, parameters, message):
   
   bot.client.send(iq_set_affiliation(room, target, 'outcast', reason))
 
+def command_superban(bot, room, nick, access_level, parameters, message):
+  if parameters == '': return "Expected <target jid>"
+  (target, reason) = separate_target_reason(bot, room, parameters)
+  iq = xmpp.Iq('set', xmpp.NS_MUC_ADMIN, {}, room)
+  item = iq.getTag('query').setTag('item')
+  item.setAttr('affiliation', 'outcast')
+  item.setAttr('jid', target)
+  bot.client.send(iq)
+  
 def command_member(bot, room, nick, access_level, parameters, message):
   if parameters == '': return "Expected <target nick> [reason]"
   (target, reason) = separate_target_reason(bot, room, parameters)
@@ -130,6 +139,7 @@ def load(bot):
   bot.add_command('delmember', command_delmember, LEVEL_MODERATOR)
   bot.add_command('kick', command_kick, LEVEL_MEMBER)
   bot.add_command('voice', command_voice, LEVEL_MEMBER)
+  bot.add_command('superban', command_superban, LEVEL_ADMIN)
   bot.add_command('devoice', command_devoice, LEVEL_MEMBER)
 
 def unload(bot):
